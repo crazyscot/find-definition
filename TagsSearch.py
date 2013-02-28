@@ -9,12 +9,17 @@ class TagsResponse:
 
 def quote_pattern(pat):
    pat = re.sub('~', '\~', pat)
-   pat = re.sub('\*', '\\\*', pat)
+   pat = re.sub('\*', '\*', pat)
+   pat = re.sub('\[', '\\[', pat)
    return pat
 
 class CTag:
    def __init__(self, line):
-      self.fields = line.split('\t')
+      # We don't use the comment part (vi comment, introduced by ") -
+      # so strip it out
+      parts = line.split('"', 1)
+      # curveball: sometimes the ex-command contains a tab.
+      self.fields = parts[0].split('\t', 2)
    def to_response(self):
       return TagsResponse(self.filename(), self.pattern())
    def tag(self):
