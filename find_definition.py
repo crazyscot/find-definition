@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, subprocess, ConfigParser
+import sys, os, subprocess, ConfigParser, argparse
 
 from TagsSearch import *
 
@@ -35,13 +35,9 @@ class GViewInvocation(ViewInvocation):
       self.waitFor=False
 
 if __name__ == '__main__':
-   helpRequested = False
-   if len(sys.argv) > 1 and sys.argv[1]=='--help':
-      helpRequested = True
-   if len(sys.argv) != 2 or helpRequested:
-      print "Usage: %s TermToSearchFor"%sys.argv[0]
-      if helpRequested: sys.exit(0)
-      sys.exit(1)
+   parser = argparse.ArgumentParser(description='Find source code definitions.')
+   parser.add_argument('string_to_search_for')
+   args = parser.parse_args()
 
    config = ConfigParser.SafeConfigParser({
       KEY_TAGS : os.path.expanduser('~/Work/Mainline/tags'),
@@ -49,8 +45,6 @@ if __name__ == '__main__':
       })
    if os.path.exists(CONFIG):
       config.read(CONFIG)
-
-   needle = sys.argv[1]
 
    invokeme = config.get(CONFIG_SECTION, KEY_INVOCATION)
    if invokeme in globals().keys():
@@ -69,7 +63,7 @@ if __name__ == '__main__':
       except TypeError,t:
          raise TypeError,('Class %s does not have a no-parameter constructor? (from %s)'%(invokeme, t.args))
 
-   tag = TagsSearcherFactory().get(config.get(CONFIG_SECTION, KEY_TAGS)).find(needle)
+   tag = TagsSearcherFactory().get(config.get(CONFIG_SECTION, KEY_TAGS)).find(args.string_to_search_for)
    if tag is None:
       print "Not found, sorry"
       sys.exit(1)
