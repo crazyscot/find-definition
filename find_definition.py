@@ -36,6 +36,7 @@ class GViewInvocation(ViewInvocation):
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser(description='Find source code definitions.')
+   parser.add_argument('--complete', action='store_true', help='Lists possible expansions for tab-completion')
    parser.add_argument('string_to_search_for')
    args = parser.parse_args()
 
@@ -45,6 +46,12 @@ if __name__ == '__main__':
       })
    if os.path.exists(CONFIG):
       config.read(CONFIG)
+
+   if args.complete:
+      gen = TagsSearcherFactory().get_generator(config.get(CONFIG_SECTION, KEY_TAGS)).generate(args.string_to_search_for)
+      for tag in gen:
+         print tag.tag(),
+      sys.exit(0)
 
    invokeme = config.get(CONFIG_SECTION, KEY_INVOCATION)
    if invokeme in globals().keys():
