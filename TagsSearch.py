@@ -37,6 +37,12 @@ class AbstractTagsSearcher:
       NOTE: Only returns the first match it finds.
       '''
       raise 'Abstract interface!'
+   def generate(self, tag):
+      '''
+      Tag search generator, i.e. returns an iterator that contains all
+      possible completions. Not quite the same as find().
+      '''
+      raise 'Abstract interface!'
 
 class LinearTagsSearcher(AbstractTagsSearcher):
    ''' Crungey old lsearch. '''
@@ -47,6 +53,13 @@ class LinearTagsSearcher(AbstractTagsSearcher):
          if line.startswith(needle):
             return CTag(line).to_response()
       return None
+
+   def generate(self,tag):
+      f = open(self.tagsfile, 'r')
+      needle = tag # Different from find() !
+      for line in f:
+         if line.startswith(needle):
+            yield CTag(line)
 
 class BinaryTagsSearcher(AbstractTagsSearcher):
    ''' bsearch is faster, particularly on large files '''
@@ -91,4 +104,6 @@ class BinaryTagsSearcher(AbstractTagsSearcher):
 class TagsSearcherFactory:
    def get(self, tagsfile):
       return BinaryTagsSearcher(tagsfile)
+   def get_generator(self,tagsfile):
+      return LinearTagsSearcher(tagsfile)
 
