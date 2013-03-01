@@ -1,0 +1,16 @@
+# Edit this to suit, then put it in ~/.bash_completion or
+# (as a separate file) into  /etc/bash_completion.d
+
+_find_definition()
+{
+   local cur prev opts
+   COMPREPLY=()
+   cur="${COMP_WORDS[COMP_CWORD]}"
+   COMPREPLY=( $(find_definition --complete ${cur}) )
+   return 0
+}
+complete -F _find_definition find_definition
+
+# Optional shortcut:
+alias fd=find_definition
+complete -F _find_definition fd

@@ -6,18 +6,24 @@ at the definition of a type, structure, function or anything else that
 ctags reports.
 
 I use it with vim.  With other editors you either need to have ctags
-support (contributions welcome!) or be prepared to use vi as an external
+support (contributions welcome! see the ctags man page for some pointers)
+or be prepared to use vi or gvim or one of its derivatives as an external
 source browser.
 
 
 Usage
 -----
 
+In my shell I can type:
+
 `$ find_definition.py fooBar`
 
 ... and vim opens up in read-only mode, right at the definition of fooBar.
-(I keep a symlink to the main script on my PATH.)
+(I keep a symlink to the script on my PATH.)
 If the definition isn't found in the tags file, the script apologises.
+
+With a suitable bash\_completion rune (see `bash-completion.sample`)
+you can even tab-complete definitions in your tags file.
 
 But, of course, this only works because I already have a tags file in
 place. Read on...
@@ -27,10 +33,13 @@ Limitations
 -----------
 
 In the words of A.A. Milne, this script is a bear of little brain.
-It takes you only to the first match for the given tag.
+It takes you only to the first match it finds for the given tag.
+(This is not necessarily the first match in the file, as it uses a
+binary search for speed. If this bugs you, you can always edit the
+TagsSearcherFactory to return the linear searcher.)
 
-If there are multiple matches in the tags file, you need to drive
-your source browser to walk them.
+In other words, if there are multiple matches in the tags file, you need
+to know how to drive your source browser to walk them.
 
 In vim:
 
@@ -39,15 +48,14 @@ In vim:
 3. Use command :tn for next, :tp for previous.
 
 Users of other editors are welcome to contribute instructions!
-
-There is no tab-completion at present; tag matching is whole-string only.
-Contributions welcome (though I might just do it myself one day).
+Don't despair, the ctags man page has some pointers.
 
 My tags file at work is 78M but the searching is blink-of-an-eye fast.
+Even the lsearch powering tab-completion is very fast.
 
 
-Setting up ctags
-----------------
+Setting up
+----------
 
 Install the exuberant-ctags package, if you don't already have it.
 
@@ -59,12 +67,17 @@ I have set up a personal cron job on my workstation to do this, here's the cront
 
     0 6 * * * /home/younger/bin/update-ctags
 
-The `update-ctags` script looks like this (redacted; edit to suit):
+My `update-ctags` script looks like this (redacted; edit to suit):
 
     #!/bin/sh
 	
     cd /home/younger/Work/Mainline
     ctags -R --c++-kinds=+p --fields=+iaS --extra=+q SourceDir* AutoGenDir
+
+Put find\_definition.py, or a symlink to it, on your PATH.
+Set up an alias if you like (I alias it to `fd`).
+If you want to tab-complete, read the instructions at the top of
+`bash-completion.sample`.
 
 
 Configuration
