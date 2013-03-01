@@ -19,8 +19,11 @@ class ViewInvocation(AbstractInvocation):
       self.CMD='view'
       self.waitFor=True
    def invoke(self, filename, expattern):
-      args = [self.CMD, filename, '-c', expattern, '-c', 'redraw']
+      args = [self.CMD, filename, '-c', expattern,
+            '-c', 'redraw',
+            '-c', 'set nohlsearch']
       # -c redraw => avoids that pesky "Press Enter to continue"
+      # -c set nohlsearch => don't highlight the line, just put the cursor there
       proc = subprocess.Popen(args, executable=self.CMD)
       # let it inherit from parent
       if self.waitFor:
