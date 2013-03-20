@@ -1,12 +1,5 @@
 import re
 
-class TagsResponse:
-   def __init__(self, filename, pattern):
-      self.filename = filename
-      self.pattern = pattern
-   def __str__(self):
-      return '[filename=%s pattern=%s]' % (self.filename, self.pattern)
-
 def quote_pattern(pat):
    pat = re.sub('~', '\~', pat)
    pat = re.sub('\*', '\*', pat)
@@ -20,14 +13,14 @@ class CTag:
       parts = line.split('"', 1)
       # curveball: sometimes the ex-command contains a tab.
       self.fields = parts[0].split('\t', 2)
-   def to_response(self):
-      return TagsResponse(self.filename(), self.pattern())
    def tag(self):
       return self.fields[0]
    def filename(self):
       return self.fields[1]
    def pattern(self):
       return quote_pattern(self.fields[2])
+   def __str__(self):
+      return '[tag=%s filename=%s pattern=%s]' % (self.tag(), self.filename(), self.pattern())
 
 class AbstractTagsSearcher:
    '''
@@ -38,7 +31,7 @@ class AbstractTagsSearcher:
 
    def find(self, tag):
       '''
-      Searches for a tag. Returns a TagsResponse, or None if not found.
+      Searches for a tag. Returns a CTag, or None if not found.
       NOTE: Only returns the first match it finds.
       '''
       raise 'Abstract interface!'
@@ -56,7 +49,7 @@ class LinearTagsSearcher(AbstractTagsSearcher):
       needle = tag + '\t'
       for line in f:
          if line.startswith(needle):
-            return CTag(line).to_response()
+            return CTag(line)
       return None
 
    def generate(self,tag):
@@ -95,7 +88,7 @@ class BinaryTagsSearcher(AbstractTagsSearcher):
          #print "..-> %s"%tag
 
          if tag == needle:
-            return ctag.to_response() # Jackpot!
+            return ctag # Jackpot!
          elif tag < needle:
             TOP = f.tell()-1 # end of the rejected mid-record
             #print "<<<"

@@ -78,5 +78,5 @@ if __name__ == '__main__':
       print "Not found, sorry"
       sys.exit(1)
    else:
-      invocation.invoke(tag.filename, tag.pattern)
+      invocation.invoke(tag.filename(), tag.pattern())
 
