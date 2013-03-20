@@ -13,17 +13,33 @@ class AbstractInvocation:
    def invoke(self, filename, expattern):
       raise TypeError,'Abstract interface!'
 
-class ViewInvocation(AbstractInvocation):
+class AbstractTagInvocation:
+   def invokeTag(self, tag):
+      raise TypeError,'Abstract interface!'
+
+class ViewInvocation(AbstractInvocation, AbstractTagInvocation):
    ''' view FILENAME -c PATTERN - give it control '''
    def __init__(self):
       self.CMD='view'
       self.waitFor=True
+
    def invoke(self, filename, expattern):
+      '''Old-style invocation, written before I realised "vim -t" existed'''
       args = [self.CMD, filename, '-c', expattern,
             '-c', 'redraw',
             '-c', 'set nohlsearch']
       # -c redraw => avoids that pesky "Press Enter to continue"
       # -c set nohlsearch => don't highlight the line, just put the cursor there
+      self.run(args)
+
+   def invokeTag(self, tag):
+      '''New-style invocation, better than the old style as it puts the
+         tag into the vim tags stack - so you can immediately use :tn if
+         the first hit isn't the one you wanted '''
+      args = [self.CMD, '-t', tag]
+      self.run(args)
+
+   def run(self, args):
       proc = subprocess.Popen(args, executable=self.CMD)
       # let it inherit from parent
       if self.waitFor:
@@ -32,7 +48,7 @@ class ViewInvocation(AbstractInvocation):
             raise subprocess.CalledProcessError(proc.returncode)
 
 class GViewInvocation(ViewInvocation):
-   ''' gview FILENAME -c PATTERN - launch it and leave it '''
+   ''' gview FILENAME -t TAG - launch it and leave it '''
    def __init__(self):
       self.CMD='gview'
       self.waitFor=False
@@ -78,5 +94,8 @@ if __name__ == '__main__':
       print "Not found, sorry"
       sys.exit(1)
    else:
-      invocation.invoke(tag.filename(), tag.pattern())
+      if isinstance(invocation,AbstractTagInvocation):
+         invocation.invokeTag(tag.tag())
+      else:
+         invocation.invoke(tag.filename(), tag.pattern())
 
