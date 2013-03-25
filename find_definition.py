@@ -59,7 +59,7 @@ def getTagsFiles(config):
 if __name__ == '__main__':
    parser = argparse.ArgumentParser(description='Find source code definitions.')
    parser.add_argument('--complete', action='store_true', help='Lists possible expansions for tab-completion')
-   parser.add_argument('string_to_search_for')
+   parser.add_argument('string_to_search_for', nargs='?') # has to be optional to allow tab-completion of the null string
    args = parser.parse_args()
 
    config = ConfigParser.SafeConfigParser({
@@ -76,6 +76,10 @@ if __name__ == '__main__':
          for tag in gen:
             print tag.tag(),
       sys.exit(0)
+
+   if args.string_to_search_for is None:
+      parser.print_help()
+      sys.exit(1)
 
    invokeme = config.get(CONFIG_SECTION, KEY_INVOCATION)
    if invokeme in globals().keys():

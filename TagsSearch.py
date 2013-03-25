@@ -39,6 +39,10 @@ class AbstractTagsSearcher:
       '''
       Tag search generator, i.e. returns an iterator that contains all
       possible completions. Not quite the same as find().
+      Tag may be None, in which case we should list all known tags
+      (this is to support tab-completion, if the user hits Tab on
+      the empty string; we pass no judgement about whether this is
+      a useful thing to do in all circumstances).
       '''
       raise 'Abstract interface!'
 
@@ -56,7 +60,7 @@ class LinearTagsSearcher(AbstractTagsSearcher):
       f = open(self.tagsfile, 'r')
       needle = tag # Different from find() !
       for line in f:
-         if line.startswith(needle):
+         if needle is None or line.startswith(needle):
             yield CTag(line)
 
 class BinaryTagsSearcher(AbstractTagsSearcher):
