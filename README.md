@@ -88,7 +88,7 @@ By default, the script reads `~/Work/Mainline/tags` and uses my `ViewInvocation`
 You can change this behaviour by creating a config file `~/.find_definition`:
 
     [DEFAULT]
-    tagsfile=/some/where/tags
+    tagsfile=/some/where/tags:/some/other/tags/file:/...
     invocation=MyClass
 
 `invocation` is the name of a class.

@@ -53,6 +53,9 @@ class GViewInvocation(ViewInvocation):
       self.CMD='gview'
       self.waitFor=False
 
+def getTagsFiles(config):
+   return config.get(CONFIG_SECTION, KEY_TAGS).split(":")
+
 if __name__ == '__main__':
    parser = argparse.ArgumentParser(description='Find source code definitions.')
    parser.add_argument('--complete', action='store_true', help='Lists possible expansions for tab-completion')
@@ -67,9 +70,11 @@ if __name__ == '__main__':
       config.read(CONFIG)
 
    if args.complete:
-      gen = TagsSearcherFactory().get_generator(config.get(CONFIG_SECTION, KEY_TAGS)).generate(args.string_to_search_for)
-      for tag in gen:
-         print tag.tag(),
+      tagsfiles = getTagsFiles(config)
+      for t in tagsfiles:
+         gen = TagsSearcherFactory().get_generator(t).generate(args.string_to_search_for)
+         for tag in gen:
+            print tag.tag(),
       sys.exit(0)
 
    invokeme = config.get(CONFIG_SECTION, KEY_INVOCATION)
@@ -89,13 +94,15 @@ if __name__ == '__main__':
       except TypeError,t:
          raise TypeError,('Class %s does not have a no-parameter constructor? (from %s)'%(invokeme, t.args))
 
-   tag = TagsSearcherFactory().get(config.get(CONFIG_SECTION, KEY_TAGS)).find(args.string_to_search_for)
-   if tag is None:
+   tagsfiles = getTagsFiles(config)
+
+   if isinstance(invocation,AbstractTagInvocation):
+      invocation.invokeTag(args.string_to_search_for)
+   else:
+      for t in tagsfiles:
+         tag = TagsSearcherFactory().get(t).find(args.string_to_search_for)
+         if tag is not None:
+            invocation.invoke(tag.filename(), tag.pattern())
+            sys.exit(0)
       print "Not found, sorry"
       sys.exit(1)
-   else:
-      if isinstance(invocation,AbstractTagInvocation):
-         invocation.invokeTag(tag.tag())
-      else:
-         invocation.invoke(tag.filename(), tag.pattern())
-
